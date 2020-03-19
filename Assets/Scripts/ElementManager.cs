@@ -7,11 +7,18 @@ using UnityEngine;
 
 public class ElementManager : MonoBehaviour
 {
-    [SerializeField] List<GameObject> elements;
     [SerializeField] Transform zoomedTransform;
+    [SerializeField] Transform elementHolder;
 
-    GameObject _currentElement = null; 
+    Element[] _elements;
+
+    Element _currentElement = null;
     Vector3 _currentElementLastPosition;
+
+    private void Start()
+    {
+        _elements = elementHolder.GetComponentsInChildren<Element>();
+    }
 
     private void Update()
     {
@@ -22,19 +29,47 @@ public class ElementManager : MonoBehaviour
 
             if (Physics.Raycast(raycast, out raycastHit))
             {
-                OnElementTouched(raycastHit.collider.gameObject);
+                if(raycastHit.collider.CompareTag("Element"))
+                    OnElementTouched(raycastHit.collider.gameObject.GetComponent<Element>());
             }
         }
     }
 
-    private void OnElementTouched(GameObject element)
+    private void OnElementTouched(Element element)
     {
         Debug.Log($"{element.name} is touched!");
-        if(_currentElement != null)
+        UnSelectCurrentElement();
+        SelectElement(element);
+    }
+    public void UnSelectAllElement()
+    {
+        UnSelectCurrentElement();
+        foreach(Element element in _elements)
+        {
+            element.gameObject.SetActive(true);
+            element.OnDeselect();
+        }
+    }
+    private void UnSelectCurrentElement()
+    {
+        if (_currentElement != null)
             _currentElement.transform.position = _currentElementLastPosition;
+    }
+    private void SelectElement(Element selectedElement)
+    {
+        foreach (Element element in _elements)
+        {
+            if(element != selectedElement)
+                element.gameObject.SetActive(false);
+        }
 
-        _currentElement = element;
-        _currentElementLastPosition = element.transform.position;
+        _currentElement = selectedElement;
+        _currentElementLastPosition = selectedElement.transform.position;
+        selectedElement.OnSelect();
+        ZoomOnElement(selectedElement);
+    }
+    private void ZoomOnElement(Element element)
+    {
         element.transform.position = zoomedTransform.position;
     }
 }
