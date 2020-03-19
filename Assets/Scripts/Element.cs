@@ -5,8 +5,11 @@ using UnityEngine;
 public class Element : MonoBehaviour
 {
     [SerializeField] private float rotationSpeed;
+    [SerializeField] private MaterialsProvider provider;
+    [SerializeField] private Renderer renderer;
 
     bool _isSelected = false;
+    int _materialIndex = 0;
     // Update is called once per frame
     void Update()
     {
@@ -22,5 +25,15 @@ public class Element : MonoBehaviour
     public void OnDeselect()
     {
         _isSelected = false;
+    }
+
+    public void ScrollMaterials()
+    {
+        renderer.material = provider.GetMaterial(_materialIndex);
+        _materialIndex++;
+        if(_materialIndex >= provider.MaterialCount)
+        {
+            _materialIndex = 0;
+        }
     }
 }

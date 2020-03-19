@@ -9,11 +9,14 @@ public class ElementManager : MonoBehaviour
 {
     [SerializeField] Transform zoomedTransform;
     [SerializeField] Transform elementHolder;
+    [SerializeField] float _touchRotationSpeed;
 
     Element[] _elements;
 
     Element _currentElement = null;
     Vector3 _currentElementLastPosition;
+
+
 
     private void Start()
     {
@@ -22,15 +25,29 @@ public class ElementManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        if(Input.touchCount > 0)
         {
-            Ray raycast = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+            var touch = Input.GetTouch(0);
+            Ray raycast = Camera.main.ScreenPointToRay(touch.position);
             RaycastHit raycastHit;
 
-            if (Physics.Raycast(raycast, out raycastHit))
+            switch (touch.phase)
             {
-                if(raycastHit.collider.CompareTag("Element"))
-                    OnElementTouched(raycastHit.collider.gameObject.GetComponent<Element>());
+                case TouchPhase.Ended:
+                    if (Physics.Raycast(raycast, out raycastHit))
+                    {
+                        if (raycastHit.collider.CompareTag("Element"))
+                            if (_currentElement == null)
+                                OnElementTouched(raycastHit.collider.gameObject.GetComponent<Element>());
+                            else
+                                _currentElement.ScrollMaterials();
+                    }
+                    
+                    break;
+                case TouchPhase.Moved:
+                    if (_currentElement != null)
+                        _currentElement.transform.Rotate(-Vector3.up * touch.deltaPosition.x * _touchRotationSpeed * Time.deltaTime);               
+                    break;
             }
         }
     }
@@ -53,7 +70,10 @@ public class ElementManager : MonoBehaviour
     private void UnSelectCurrentElement()
     {
         if (_currentElement != null)
+        {
             _currentElement.transform.position = _currentElementLastPosition;
+            _currentElement = null;
+        }
     }
     private void SelectElement(Element selectedElement)
     {

@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 10
+  provider: {fileID: 11400000, guid: 76f9a1fb44121fc4e87cec0c932efcbb, type: 2}
+  renderer: {fileID: 3172436594996475410}
 --- !u!65 &2123295243
 BoxCollider:
   m_ObjectHideFlags: 0
